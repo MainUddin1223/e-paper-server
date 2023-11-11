@@ -9,3 +9,87 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Users {
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  password       String
+  role           UserRole         @default(admin)
+  accountStatus  AccountStatus    @default(active)
+  credintial     String?
+  newsPage       NewsPage[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  newsImages     NewsImages[]
+  advertisements Advertisements[]
+  featuredPage   FeaturedPage[]
+
+  @@map("users")
+}
+
+model NewsPage {
+  id         Int          @id @default(autoincrement())
+  user       Users        @relation(fields: [userId], references: [id])
+  title      String
+  newsDate   String
+  userId     Int
+  pageImg    String?
+  newsImages NewsImages[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@map("newsPage")
+}
+
+model NewsImages {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  pageId       Int
+  images       String[]
+  refrencePage Int?
+  page         NewsPage @relation(fields: [pageId], references: [id])
+  user         Users    @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("newsImages")
+}
+
+model Advertisements {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  topAds    String[]
+  leftAds   String[]
+  bottomAds String[]
+  rightAds  String[]
+  popupAds  String[]
+  user      Users    @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("advertisements")
+}
+
+model FeaturedPage {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  publishedDate DateTime
+  pageImage     String
+  title         String
+  user          Users    @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("featuredPage")
+}
+
+enum UserRole {
+  owner
+  superAdmin
+  admin
+}
+
+enum AccountStatus {
+  active
+  inactive
+}
