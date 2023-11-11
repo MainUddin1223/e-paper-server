@@ -5,12 +5,13 @@ import { FileUploadHelper } from '../../utils/imageUploader/uploader';
 import sendResponse from '../../utils/helpers/sendResponse';
 
 const createNewsPage = catchAsync(async (req: Request, res: Response) => {
-  const file = req.file as IUploadFile;
-  const uploadedImage = await FileUploadHelper.uploadToCloudinary(file);
+  const files = req.files as IUploadFile[];
+  const uploadedFiles = await FileUploadHelper.uploadToCloudinary(files);
+  console.log(uploadedFiles);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    data: uploadedImage,
+    data: uploadedFiles,
     message: 'Successfully uploaded',
   });
 });

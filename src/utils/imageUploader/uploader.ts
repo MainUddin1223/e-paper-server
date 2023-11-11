@@ -3,6 +3,7 @@ import multer from 'multer';
 import * as fs from 'fs';
 import { ICloudinaryResponse, IUploadFile } from './interface';
 import config from '../config';
+import ApiError from '../errorHandlers/apiError';
 
 cloudinary.config({
   cloud_name: config.cloudinary.cloudName,
@@ -21,37 +22,44 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-const uploadToCloudinary = async (
-  file: IUploadFile
-): Promise<ICloudinaryResponse> => {
-  const path = file.path;
-  const publishedDate = new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    timeZone: 'Asia/Dhaka',
-  }).format(new Date());
-  const folderName = publishedDate.replace(/\//g, '-');
-  const options = { folder: `companyName/${folderName}-epaper` };
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(
-      path,
-      options,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      (error: Error, result: ICloudinaryResponse) => {
-        fs.unlinkSync(file.path);
-        if (error) {
-          console.log('-------error', error);
-          reject(error);
-        } else {
-          resolve(result);
-        }
-      }
-    );
-  });
-};
+const uploadToCloudinary = async (files: IUploadFile[]): Promise<string[]> => {
+  const uploadedImages: string[] = [];
+  await Promise.all(
+    files.map(async file => {
+      const path = file.path;
+      const publishedDate = new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        timeZone: 'Asia/Dhaka',
+      }).format(new Date());
 
+      const folderName = publishedDate.replace(/\//g, '-');
+      const options = { folder: `companyName/${folderName}-epaper` };
+
+      return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload(
+          path,
+          options,
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          //@ts-ignore
+          (error: Error, result: ICloudinaryResponse) => {
+            fs.unlinkSync(file.path);
+            if (error) {
+              console.log('-------error', error);
+              reject(new ApiError(500, 'Failed to upload image'));
+            } else {
+              uploadedImages.push(result.secure_url);
+              resolve(result);
+            }
+          }
+        );
+      });
+    })
+  );
+
+  return uploadedImages;
+};
 export const FileUploadHelper = {
   uploadToCloudinary,
   upload,

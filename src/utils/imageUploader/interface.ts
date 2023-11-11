@@ -28,9 +28,4 @@ export interface ICloudinaryResponse {
   placeholder: boolean;
   url: string;
   secure_url: string;
-  folder: string;
-  original_filename: string;
-  original_extension: string;
-  api_key: string;
-  UploadApiResponse: string | undefined;
 }
