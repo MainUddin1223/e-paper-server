@@ -6,8 +6,15 @@ import sendResponse from '../../utils/helpers/sendResponse';
 
 const createNewsPage = catchAsync(async (req: Request, res: Response) => {
   const files = req.files as IUploadFile[];
-  const uploadedFiles = await FileUploadHelper.uploadToCloudinary(files);
-  console.log(uploadedFiles);
+  const uploadedFiles: string[] = [];
+
+  await Promise.all(
+    files.map(async file => {
+      const imgUrl = await FileUploadHelper.uploadToCloudinary(file);
+      uploadedFiles.push(imgUrl);
+    })
+  );
+
   sendResponse(res, {
     statusCode: 200,
     success: true,
