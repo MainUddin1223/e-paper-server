@@ -34,6 +34,7 @@ model NewsPage {
   id         Int          @id @default(autoincrement())
   user       Users        @relation(fields: [userId], references: [id])
   title      String
+  pageId     Int
   newsDate   String
   userId     Int
   pageImg    String?
@@ -47,6 +48,7 @@ model NewsPage {
 model NewsImages {
   id           Int      @id @default(autoincrement())
   userId       Int
+  order        Int
   pageId       Int
   images       String[]
   refrencePage Int?

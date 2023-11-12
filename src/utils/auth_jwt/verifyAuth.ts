@@ -32,13 +32,13 @@ const verifyAuthWithRole = (allowedRoles: string[]) => {
         },
       });
 
+      if (!isExist?.id || !allowedRoles.includes(isExist.role)) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
       if (!isExist?.passwordChanged) {
         return res.status(401).json({ message: 'Change your password' });
       }
 
-      if (!isExist?.id || !allowedRoles.includes(isExist.role)) {
-        return res.status(401).json({ message: 'Unauthorized' });
-      }
       req.user = {
         role: isExist.role,
         userId: isExist.id,
