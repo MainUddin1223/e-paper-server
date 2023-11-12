@@ -46,16 +46,16 @@ model NewsPage {
 }
 
 model NewsImages {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  order        Int
-  pageId       Int
-  images       String[]
-  refrencePage Int?
-  page         NewsPage @relation(fields: [pageId], references: [id])
-  user         Users    @relation(fields: [userId], references: [id])
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  order         Int
+  pageId        Int
+  images        String[]
+  referencePage Int?
+  page          NewsPage @relation(fields: [pageId], references: [id])
+  user          Users    @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("newsImages")
 }

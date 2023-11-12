@@ -77,6 +77,27 @@ const getNewsPageById = async (id: number) => {
   });
   return result;
 };
+export interface IUploadData {
+  userId: number;
+  order: number;
+  pageId: number;
+  referencePage: number;
+  images: string[];
+}
+const uploadNews = async (data: IUploadData) => {
+  const result = await prisma.newsImages.create({ data });
+  return result;
+};
+
+const updateNews = async (id: number, data: Partial<IUploadData>) => {
+  const result = await prisma.newsImages.update({
+    where: {
+      id,
+    },
+    data,
+  });
+  return result;
+};
 
 export const adminService = {
   createNewsPage,
@@ -86,4 +107,6 @@ export const adminService = {
   updateNewsPage,
   getNewsPageById,
   getNewPages,
+  uploadNews,
+  updateNews,
 };

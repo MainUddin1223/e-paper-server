@@ -4,7 +4,11 @@ import { IUploadFile } from '../../utils/imageUploader/interface';
 import { FileUploadHelper } from '../../utils/imageUploader/uploader';
 import sendResponse from '../../utils/helpers/sendResponse';
 import { adminService } from './admin.service';
-import { createPageSchema } from './admin.validator';
+import {
+  createNewsSchema,
+  createPageSchema,
+  updateNewsSchema,
+} from './admin.validator';
 import ApiError from '../../utils/errorHandlers/apiError';
 import { StatusCodes } from 'http-status-codes';
 
@@ -87,32 +91,75 @@ const getNewsPageById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// const NewsPage = catchAsync(async (req: Request, res: Response) => {
-//   const userId = Number(req.user?.userId)
-//   const files = req.files as IUploadFile[];
-//   const uploadedFiles: string[] = [];
+const uploadNews = catchAsync(async (req: Request, res: Response) => {
+  const { error } = createNewsSchema.validate(req.body);
+  if (error) {
+    const message = error.details[0]?.message || 'Validation error';
+    throw new ApiError(StatusCodes.NON_AUTHORITATIVE_INFORMATION, message);
+  }
+  const userId = Number(req.user?.userId);
+  const files = req.files as IUploadFile[];
+  const uploadedFiles: string[] = [];
 
-//   await Promise.all(
-//     files.map(async file => {
-//       const imgUrl = await FileUploadHelper.uploadToCloudinary(file);
-//       uploadedFiles.push(imgUrl);
-//     })
-//   );
-//   const pageImg =
+  await Promise.all(
+    files.map(async file => {
+      const imgUrl = await FileUploadHelper.uploadToCloudinary(file);
+      uploadedFiles.push(imgUrl);
+    })
+  );
 
-//   const result = await adminService.createNewsPage({...req.body,userId,})
+  const result = await adminService.uploadNews({
+    ...req.body,
+    userId,
+    images: uploadedFiles,
+  });
 
-//   sendResponse(res, {
-//     statusCode: 200,
-//     success: true,
-//     data: uploadedFiles,
-//     message: 'Successfully uploaded',
-//   });
-// });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'Successfully uploaded',
+  });
+});
+
+const updateNews = catchAsync(async (req: Request, res: Response) => {
+  const { error } = updateNewsSchema.validate(req.body);
+  if (error) {
+    const message = error.details[0]?.message || 'Validation error';
+    throw new ApiError(StatusCodes.NON_AUTHORITATIVE_INFORMATION, message);
+  }
+  const id = Number(req.params.id);
+  const files = req.files as IUploadFile[];
+  const uploadedFiles: string[] = [];
+  let result;
+  if (files) {
+    await Promise.all(
+      files.map(async file => {
+        const imgUrl = await FileUploadHelper.uploadToCloudinary(file);
+        uploadedFiles.push(imgUrl);
+      })
+    );
+    result = await adminService.updateNews(id, {
+      ...req.body,
+      images: uploadedFiles,
+    });
+  } else {
+    result = await adminService.updateNews(id, { ...req.body });
+  }
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'Successfully updated',
+  });
+});
 
 export const adminController = {
   createNewsPage,
   updateNewsPage,
   getNewPages,
   getNewsPageById,
+  uploadNews,
+  updateNews,
 };

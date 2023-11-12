@@ -29,13 +29,25 @@ router
 
 router.route('/news-pages').get(verifyAdmin, adminController.getNewPages);
 
-// .route('/create-news-page')
-// .post(
-//   FileUploadHelper.upload.array('file'),
-//   (req: Request, res: Response, next: NextFunction) => {
-//     req.body = JSON.parse(req.body.data);
-//     return adminController.createNewsPage(req, res, next);
-//   }
-// );
+router
+  .route('/create-news')
+  .post(
+    verifyAdmin,
+    FileUploadHelper.upload.array('file'),
+    (req: Request, res: Response, next: NextFunction) => {
+      req.body = JSON.parse(req.body.data);
+      return adminController.uploadNews(req, res, next);
+    }
+  );
+router
+  .route('/news/:id')
+  .patch(
+    verifyAdmin,
+    FileUploadHelper.upload.array('file'),
+    (req: Request, res: Response, next: NextFunction) => {
+      req.body = JSON.parse(req.body.data);
+      return adminController.updateNews(req, res, next);
+    }
+  );
 
 export default { adminRouter: router };
