@@ -60,10 +60,30 @@ const updateNewsPage = async (
   return result;
 };
 
+const getNewPages = async (date: string) => {
+  const result = await prisma.newsPage.findMany({
+    where: {
+      newsDate: date,
+    },
+  });
+  return result;
+};
+const getNewsPageById = async (id: number) => {
+  console.log(id);
+  const result = await prisma.newsPage.findUnique({
+    where: {
+      id,
+    },
+  });
+  return result;
+};
+
 export const adminService = {
   createNewsPage,
   manageAdmin,
   getAllAdmins,
   updateProfile,
   updateNewsPage,
+  getNewsPageById,
+  getNewPages,
 };

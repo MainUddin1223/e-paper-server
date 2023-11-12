@@ -16,7 +16,7 @@ router
     }
   );
 router
-  .route('/update-news-page/:id')
+  .route('/news-pages/:id')
   .patch(
     verifyAdmin,
     FileUploadHelper.upload.single('file'),
@@ -24,7 +24,11 @@ router
       req.body = JSON.parse(req.body.data);
       return adminController.updateNewsPage(req, res, next);
     }
-  );
+  )
+  .get(verifyAdmin, adminController.getNewsPageById);
+
+router.route('/news-pages').get(verifyAdmin, adminController.getNewPages);
+
 // .route('/create-news-page')
 // .post(
 //   FileUploadHelper.upload.array('file'),

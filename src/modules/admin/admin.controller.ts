@@ -63,6 +63,30 @@ const updateNewsPage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getNewPages = catchAsync(async (req: Request, res: Response) => {
+  const date = req.query.date?.toString() || '';
+  const result = await adminService.getNewPages(date);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'News pages fetched successfully',
+  });
+});
+
+const getNewsPageById = catchAsync(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const result = await adminService.getNewsPageById(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'News page fetched successfully',
+  });
+});
+
 // const NewsPage = catchAsync(async (req: Request, res: Response) => {
 //   const userId = Number(req.user?.userId)
 //   const files = req.files as IUploadFile[];
@@ -86,4 +110,9 @@ const updateNewsPage = catchAsync(async (req: Request, res: Response) => {
 //   });
 // });
 
-export const adminController = { createNewsPage, updateNewsPage };
+export const adminController = {
+  createNewsPage,
+  updateNewsPage,
+  getNewPages,
+  getNewsPageById,
+};
