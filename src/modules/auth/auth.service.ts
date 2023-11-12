@@ -70,6 +70,64 @@ const login = async (payload: ILoginPayload) => {
       name: isUserExist.name,
       email: isUserExist.email,
       image: isUserExist.image,
+      isClaimed: isUserExist.passwordChanged,
+    },
+  };
+};
+const changePassword = async (payload: IChangePasswordPayload) => {
+  const { newPassword, oldPassword, userId } = payload;
+  const isUserExist = await prisma.users.findFirst({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!isUserExist) {
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      authServiceMessage.serverError
+    );
+  }
+  const isPasswordMatched = await bcrypt.compare(
+    oldPassword,
+    isUserExist.password
+  );
+  if (!isPasswordMatched) {
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      authServiceMessage.serverError
+    );
+  }
+
+  const bcryptPassword = bcrypt.hashSync(newPassword, 10);
+  await prisma.users.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      password: bcryptPassword,
+      passwordChanged: true,
+    },
+  });
+  const authData = {
+    userId: isUserExist?.id,
+    role: isUserExist?.role,
+    isClaimed: true,
+  };
+
+  const accessToken = await jwtToken.createToken(
+    authData,
+    config.access_secret as string,
+    config.access_secret_expiry as string
+  );
+
+  return {
+    accessToken,
+    profile: {
+      name: isUserExist.name,
+      email: isUserExist.email,
+      image: isUserExist.image,
+      isClaimed: true,
     },
   };
 };
@@ -87,50 +145,6 @@ const updateProfile = async (payload: IUpdateProfilePayload) => {
       name: result.name,
       email: result.email,
       image: result.image,
-    },
-  };
-};
-
-const changePassword = async (payload: IChangePasswordPayload) => {
-  const { password, userId } = payload;
-  const isUserExist = await prisma.users.findFirst({
-    where: {
-      id: userId,
-    },
-  });
-
-  if (!isUserExist) {
-    throw new ApiError(
-      StatusCodes.INTERNAL_SERVER_ERROR,
-      authServiceMessage.serverError
-    );
-  }
-  const bcryptPassword = bcrypt.hashSync(password, 10);
-  await prisma.users.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      password: bcryptPassword,
-      passwordChanged: true,
-    },
-  });
-  const authData = {
-    userId: isUserExist?.id,
-    role: isUserExist?.role,
-    isClaimed: true,
-  };
-  const accessToken = await jwtToken.createToken(
-    authData,
-    config.access_secret as string,
-    config.access_secret_expiry as string
-  );
-  return {
-    accessToken,
-    profile: {
-      name: isUserExist.name,
-      email: isUserExist.email,
-      image: isUserExist.image,
     },
   };
 };

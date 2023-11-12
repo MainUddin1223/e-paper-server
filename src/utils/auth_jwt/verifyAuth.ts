@@ -15,52 +15,32 @@ const verifyAuthWithRole = (allowedRoles: string[]) => {
     try {
       const decoded = jwtToken.verifyToken(
         token,
-        config.jwt.jwt_access_secret as string
+        config.access_secret as string
       );
-      let isExist;
-      if (!decoded.authId) {
+      if (!decoded.userId) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
-      if (decoded.role === 'agency') {
-        isExist = await prisma.agency.findUnique({
-          where: {
-            id: decoded.userId,
-          },
-          select: {
-            id: true,
-            auth: {
-              select: {
-                id: true,
-                role: true,
-                accountStatus: true,
-              },
-            },
-          },
-        });
-      } else {
-        isExist = await prisma.user.findUnique({
-          where: {
-            id: decoded.userId,
-          },
-          select: {
-            id: true,
-            auth: {
-              select: {
-                id: true,
-                role: true,
-                accountStatus: true,
-              },
-            },
-          },
-        });
+      const isExist = await prisma.users.findUnique({
+        where: {
+          id: decoded.userId,
+        },
+        select: {
+          id: true,
+          role: true,
+          accountStatus: true,
+          passwordChanged: true,
+        },
+      });
+
+      if (!isExist?.passwordChanged) {
+        return res.status(401).json({ message: 'Change your password' });
       }
 
-      if (!isExist?.id || !allowedRoles.includes(isExist.auth?.role)) {
+      if (!isExist?.id || !allowedRoles.includes(isExist.role)) {
         return res.status(401).json({ message: 'Unauthorized' });
       }
       req.user = {
-        authId: isExist.auth.id,
-        role: isExist.auth.role,
+        role: isExist.role,
         userId: isExist.id,
       };
       next();
@@ -77,53 +57,27 @@ const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const decoded = jwtToken.verifyToken(
-      token,
-      config.jwt.jwt_access_secret as string
-    );
-    let isExist;
-    if (!decoded.authId) {
+    const decoded = jwtToken.verifyToken(token, config.access_secret as string);
+    if (!decoded.userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-    if (decoded.role === 'agency') {
-      isExist = await prisma.agency.findUnique({
-        where: {
-          id: decoded.userId,
-        },
-        select: {
-          id: true,
-          auth: {
-            select: {
-              id: true,
-              role: true,
-              accountStatus: true,
-            },
-          },
-        },
-      });
-    } else {
-      isExist = await prisma.user.findUnique({
-        where: {
-          id: decoded.userId,
-        },
-        select: {
-          id: true,
-          auth: {
-            select: {
-              id: true,
-              role: true,
-              accountStatus: true,
-            },
-          },
-        },
-      });
-    }
-    if (isExist?.auth.accountStatus !== 'active') {
+
+    const isExist = await prisma.users.findUnique({
+      where: {
+        id: decoded.userId,
+      },
+      select: {
+        id: true,
+        passwordChanged: true,
+        accountStatus: true,
+        role: true,
+      },
+    });
+    if (isExist?.accountStatus !== 'active') {
       return res.status(401).json({ message: 'Unauthorized' });
     }
     req.user = {
-      authId: isExist.auth.id,
-      role: isExist.auth.role,
+      role: isExist.role,
       userId: isExist.id,
     };
     next();
@@ -134,7 +88,6 @@ const verifyAuth = async (req: Request, res: Response, next: NextFunction) => {
 
 const verifyAdmin = verifyAuthWithRole(['admin', 'super_admin']);
 const verifySuperAdmin = verifyAuthWithRole(['super_admin']);
-const verifyUser = verifyAuthWithRole(['user']);
-const verifyAgency = verifyAuthWithRole(['agency']);
+const verifyOwner = verifyAuthWithRole(['owner']);
 
-export { verifyAdmin, verifyUser, verifyAuth, verifySuperAdmin, verifyAgency };
+export { verifyAdmin, verifyOwner, verifyAuth, verifySuperAdmin };

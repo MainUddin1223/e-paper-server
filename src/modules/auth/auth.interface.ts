@@ -4,7 +4,8 @@ export interface ILoginPayload {
 }
 
 export interface IChangePasswordPayload {
-  password: string;
+  oldPassword: string;
+  newPassword: string;
   userId: number;
 }
 
