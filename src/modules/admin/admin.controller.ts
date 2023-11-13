@@ -155,6 +155,28 @@ const updateNews = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getNewsById = catchAsync(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const result = await adminService.getNewsById(id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'News page fetched successfully',
+  });
+});
+
+const deleteNewsById = catchAsync(async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+  const result = await adminService.deleteNewsById(id);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'News page fetched successfully',
+  });
+});
+
 export const adminController = {
   createNewsPage,
   updateNewsPage,
@@ -162,4 +184,6 @@ export const adminController = {
   getNewsPageById,
   uploadNews,
   updateNews,
+  getNewsById,
+  deleteNewsById,
 };

@@ -69,10 +69,17 @@ const getNewPages = async (date: string) => {
   return result;
 };
 const getNewsPageById = async (id: number) => {
-  console.log(id);
   const result = await prisma.newsPage.findUnique({
     where: {
       id,
+    },
+    select: {
+      id: true,
+      newsDate: true,
+      pageId: true,
+      title: true,
+      pageImg: true,
+      newsImages: true,
     },
   });
   return result;
@@ -84,6 +91,7 @@ export interface IUploadData {
   referencePage: number;
   images: string[];
 }
+
 const uploadNews = async (data: IUploadData) => {
   const result = await prisma.newsImages.create({ data });
   return result;
@@ -99,6 +107,20 @@ const updateNews = async (id: number, data: Partial<IUploadData>) => {
   return result;
 };
 
+const getNewsById = async (id: number) => {
+  const result = await prisma.newsImages.findUnique({
+    where: {
+      id,
+    },
+  });
+  return result;
+};
+
+const deleteNewsById = async (id: number) => {
+  await prisma.newsImages.delete({ where: { id } });
+  return { result: 'News deleted successfully' };
+};
+
 export const adminService = {
   createNewsPage,
   manageAdmin,
@@ -109,4 +131,6 @@ export const adminService = {
   getNewPages,
   uploadNews,
   updateNews,
+  getNewsById,
+  deleteNewsById,
 };

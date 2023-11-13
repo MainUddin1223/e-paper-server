@@ -48,6 +48,8 @@ router
       req.body = JSON.parse(req.body.data);
       return adminController.updateNews(req, res, next);
     }
-  );
+  )
+  .get(verifyAdmin, adminController.getNewsById)
+  .delete(verifyAdmin, adminController.deleteNewsById);
 
 export default { adminRouter: router };
