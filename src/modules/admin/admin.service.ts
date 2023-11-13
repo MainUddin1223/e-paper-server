@@ -127,6 +127,32 @@ const createAdvertisement = async (id: number) => {
   return result;
 };
 
+interface IAddPosition {
+  position: 'topAds' | 'leftAds' | 'bottomAds' | 'rightAds' | 'popupAds';
+  add: string;
+}
+
+const addAdvertisement = async (data: IAddPosition) => {
+  const { add, position } = data;
+  const getAdvertisement = await prisma.advertisements.findUnique({
+    where: { id: 1 },
+  });
+  if (getAdvertisement) {
+    const prevAdds = getAdvertisement[position];
+    let updatedAdds;
+    if (Array.isArray(prevAdds)) {
+      updatedAdds = { [position]: [...prevAdds, add] };
+    } else {
+      updatedAdds = { [position]: add };
+    }
+    const result = await prisma.advertisements.update({
+      where: { id: getAdvertisement.id },
+      data: { ...updatedAdds },
+    });
+    return result;
+  }
+};
+
 export const adminService = {
   createNewsPage,
   manageAdmin,
@@ -140,4 +166,5 @@ export const adminService = {
   getNewsById,
   deleteNewsById,
   createAdvertisement,
+  addAdvertisement,
 };

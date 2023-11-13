@@ -52,4 +52,14 @@ router
   .get(verifyAdmin, adminController.getNewsById)
   .delete(verifyAdmin, adminController.deleteNewsById);
 
+router
+  .route('/advertisement')
+  .patch(
+    verifyAdmin,
+    FileUploadHelper.upload.single('file'),
+    (req: Request, res: Response, next: NextFunction) => {
+      return adminController.addAdvertisement(req, res, next);
+    }
+  );
+
 export default { adminRouter: router };

@@ -108,7 +108,6 @@ const uploadNews = catchAsync(async (req: Request, res: Response) => {
       uploadedFiles.push(imgUrl);
     })
   );
-  console.log(files);
 
   const result = await adminService.uploadNews({
     ...req.body,
@@ -179,6 +178,35 @@ const deleteNewsById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const addAdvertisement = catchAsync(async (req: Request, res: Response) => {
+  const adSection = req.query.adSection as
+    | 'topAds'
+    | 'leftAds'
+    | 'bottomAds'
+    | 'rightAds'
+    | 'popupAds';
+  if (!adSection) {
+    throw new ApiError(500, 'Add section needed');
+  }
+  const file = req.file as IUploadFile;
+  let pageImg = req.body.pageImg || null;
+  if (file) {
+    pageImg = await FileUploadHelper.uploadToCloudinary(file);
+  }
+
+  const result = await adminService.addAdvertisement({
+    position: adSection,
+    add: pageImg,
+  });
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    data: result,
+    message: 'Ad added successfully',
+  });
+});
+
 export const adminController = {
   createNewsPage,
   updateNewsPage,
@@ -188,4 +216,5 @@ export const adminController = {
   updateNews,
   getNewsById,
   deleteNewsById,
+  addAdvertisement,
 };
