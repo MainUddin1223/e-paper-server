@@ -103,10 +103,12 @@ const uploadNews = catchAsync(async (req: Request, res: Response) => {
 
   await Promise.all(
     files.map(async file => {
+      console.log('mapinggggg');
       const imgUrl = await FileUploadHelper.uploadToCloudinary(file);
       uploadedFiles.push(imgUrl);
     })
   );
+  console.log(files);
 
   const result = await adminService.uploadNews({
     ...req.body,

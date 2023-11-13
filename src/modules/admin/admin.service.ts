@@ -93,6 +93,7 @@ export interface IUploadData {
 }
 
 const uploadNews = async (data: IUploadData) => {
+  // await createAdvertisement(data.userId)
   const result = await prisma.newsImages.create({ data });
   return result;
 };
@@ -121,6 +122,11 @@ const deleteNewsById = async (id: number) => {
   return { result: 'News deleted successfully' };
 };
 
+const createAdvertisement = async (id: number) => {
+  const result = await prisma.advertisements.create({ data: { userId: id } });
+  return result;
+};
+
 export const adminService = {
   createNewsPage,
   manageAdmin,
@@ -133,4 +139,5 @@ export const adminService = {
   updateNews,
   getNewsById,
   deleteNewsById,
+  createAdvertisement,
 };
